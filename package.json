@@ -1,9 +1,12 @@
 {
   "name": "mindless-route53-cloudformation",
   "version": "0.0.0-development",
-  "description": "intelligently create DNS entries for IP addresses or load balancers output from a CloudFormation stack",
+  "description": "Intelligently create DNS entries an EC2 Instance or load balancer output from a CloudFormation stack",
   "main": "index.js",
   "sideEffects": false,
+  "bin": {
+    "cfroute53": "./cli.js"
+  },
   "scripts": {
     "lint": "eslint src test --cache",
     "lint:fix": "eslint --fix src test --cache",
@@ -126,6 +129,7 @@
     "aws-sdk": "^2.499.0",
     "chalk": "^2.4.2",
     "flow-runtime": "^0.17.0",
+    "inquirer": "^6.5.0",
     "is-domain-name": "^1.0.1",
     "is-ip": "^3.1.0",
     "mindless-route53": "^1.0.1",

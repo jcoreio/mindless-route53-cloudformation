@@ -37,11 +37,12 @@ async function genRecordSetsForECSInstance(options: {
   InstanceId: string,
   DNSName: string,
   EC2?: ?AWS.EC2,
+  TTL?: ?number,
   region?: ?string,
   log?: ?(...args: any) => any,
   verbose?: ?boolean,
 }): Promise<Array<GeneratedResourceRecordSet>> {
-  const { InstanceId, DNSName, verbose, region } = options
+  const { InstanceId, DNSName, TTL, verbose, region } = options
   const log = options.log || console.error.bind(console) // eslint-disable-line no-console
   const EC2 = options.EC2 || new AWS.EC2(region ? { region } : {})
   if (verbose) log(`Describing EC2 Instance: ${InstanceId}...`)
@@ -50,14 +51,14 @@ async function genRecordSetsForECSInstance(options: {
   }).promise()
   DescribeInstancesResponseType.assert(response)
   const { Reservations } = response
-  if (!Reservations.length) throw new Error(`instance not found: ${InstanceId}`)
+  if (!Reservations.length) throw new Error(`Instance not found: ${InstanceId}`)
   if (Reservations.length > 1)
-    throw new Error(`multiple reservations found for instance: ${InstanceId}`)
+    throw new Error(`Multiple reservations found for instance: ${InstanceId}`)
   const { Instances } = Reservations[0]
   if (!Instances || !Instances.length)
-    throw new Error(`instance not found: ${InstanceId}`)
+    throw new Error(`Instance not found: ${InstanceId}`)
   if (Instances.length > 1)
-    throw new Error(`multiple instances found for id: ${InstanceId}`)
+    throw new Error(`Multiple instances found for id: ${InstanceId}`)
 
   const { PublicIpAddress, PrivateIpAddress } = Instances[0]
   if (verbose) {
@@ -89,6 +90,11 @@ async function genRecordSetsForECSInstance(options: {
       InstanceId,
       PrivateZone: true,
     })
+  }
+  if (TTL != null) {
+    for (const { ResourceRecordSet } of result) {
+      ResourceRecordSet.TTL = TTL
+    }
   }
   return result
 }
@@ -145,13 +151,14 @@ async function genRecordSetsForLoadBalancer(options: {
 export async function genRecordSetsForStackOutputs(options: {
   Outputs: Array<StackOutput>,
   DNSName: string,
+  TTL?: ?number,
   EC2?: ?AWS.EC2,
   ELBv2?: ?AWS.ELBv2,
   region?: ?string,
   log?: ?(...args: any) => any,
   verbose?: ?boolean,
 }): Promise<Array<GeneratedResourceRecordSet>> {
-  const { Outputs, DNSName, EC2, ELBv2, region, verbose } = options
+  const { Outputs, DNSName, TTL, EC2, ELBv2, region, verbose } = options
   const log = options.log || console.error.bind(console) // eslint-disable-line no-console
   const ecsInstanceIds: { [string]: string } = {}
   const loadBalancerArns: { [string]: string } = {}
@@ -162,13 +169,14 @@ export async function genRecordSetsForStackOutputs(options: {
       loadBalancerArns[OutputKey] = OutputValue
   }
   if (isEmpty(ecsInstanceIds) && isEmpty(loadBalancerArns)) {
-    throw new Error(`no addressable outputs found`)
+    throw new Error(`No addressable outputs found`)
   }
   if (isEmpty(ecsInstanceIds) !== isEmpty(loadBalancerArns)) {
     if (!isEmpty(ecsInstanceIds)) {
       const result = await genRecordSetsForECSInstance({
         InstanceId: (Object.values(ecsInstanceIds)[0]: any),
         DNSName,
+        TTL,
         EC2,
         region,
         log,
@@ -191,7 +199,7 @@ export async function genRecordSetsForStackOutputs(options: {
       return result
     }
   }
-  throw new Error(`multiple addressable outputs found!
+  throw new Error(`Multiple addressable outputs found!
 ${
     isEmpty(ecsInstanceIds)
       ? ''
@@ -207,6 +215,7 @@ ${
 export async function genRecordSetsForStack(options: {
   StackName: string,
   DNSName: string,
+  TTL?: ?number,
   interactive?: ?boolean,
   CloudFormation?: ?AWS.CloudFormation,
   EC2?: ?AWS.EC2,
@@ -223,6 +232,7 @@ export async function genRecordSetsForStack(options: {
     ELBv2,
     verbose,
     region,
+    TTL,
   } = options
   const log = options.log || console.error.bind(console) // eslint-disable-line no-console
   const CloudFormation =
@@ -241,6 +251,7 @@ export async function genRecordSetsForStack(options: {
   return await genRecordSetsForStackOutputs({
     Outputs,
     DNSName,
+    TTL,
     interactive,
     EC2,
     ELBv2,
@@ -250,38 +261,34 @@ export async function genRecordSetsForStack(options: {
   })
 }
 
-async function confirmRecordSets(options: {
+export function confirmationMessage(options: {
   StackName: string,
   recordSets: Array<GeneratedResourceRecordSet>,
-}): Promise<void> {
+}): string {
   const { StackName, recordSets } = options
   /* eslint-disable no-console */
-  console.log(
-    `These are the DNS records that will be upserted for stack ${StackName}:`
-  )
-  recordSets.forEach(
-    ({
-      ResourceRecordSet,
-      PrivateZone,
-      OutputKey,
-      InstanceId,
-      LoadBalancerArn,
-    }: GeneratedResourceRecordSet) => {
-      console.log(
+  return `These are the DNS records that will be upserted for stack ${StackName}:
+
+${recordSets
+    .map(
+      ({
+        ResourceRecordSet,
+        PrivateZone,
+        OutputKey,
+        InstanceId,
+        LoadBalancerArn,
+      }: GeneratedResourceRecordSet) =>
         `${chalk.bold(ResourceRecordSet.Name)} (${
           PrivateZone ? 'private' : 'public'
-        } zone)`
-      )
-      console.log(
-        `  from stack output [${String(OutputKey)}]: ${String(
+        } zone)
+  from stack output [${String(OutputKey)}]: ${String(
           InstanceId || LoadBalancerArn
-        )}:`
-      )
-      console.log(
-        JSON.stringify(ResourceRecordSet, null, 2).replace(/^/gm, '  ')
-      )
-    }
-  )
+        )}:
+${JSON.stringify(ResourceRecordSet, null, 2).replace(/^/gm, '  ')}
+`
+    )
+    .join('\n')}
+  `
   /* eslint-enable no-console */
 }
 
@@ -301,6 +308,9 @@ if (!module.parent) {
       DNSName,
       region: 'us-west-2',
       verbose: false,
-    }).then(r => confirmRecordSets({ StackName, recordSets: r }), console.error) // eslint-disable-line no-console
+    }).then(
+      r => console.log(confirmationMessage({ StackName, recordSets: r })),
+      console.error
+    ) // eslint-disable-line no-console
   }
 }
