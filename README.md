@@ -6,7 +6,8 @@
 [![Commitizen friendly](https://img.shields.io/badge/commitizen-friendly-brightgreen.svg)](http://commitizen.github.io/cz-cli/)
 [![npm version](https://badge.fury.io/js/mindless-route53-cloudformation.svg)](https://badge.fury.io/js/mindless-route53-cloudformation)
 
-Intelligently create DNS entries an EC2 Instance or load balancer output from a CloudFormation stack
+Intelligently create DNS records an EC2 Instance or load balancer output from a CloudFormation stack.
+Using this command makes it easier to deal with a stack getting hosed than creating the DNS records with CloudFormation -- when something goes really wrong you can just create a new stack, and update the DNS records to point to it with this command.
 
 # Node.js API
 
