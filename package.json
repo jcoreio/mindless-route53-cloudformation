@@ -1,7 +1,7 @@
 {
-  "name": "es2015-library-skeleton",
+  "name": "mindless-route53-cloudformation",
   "version": "0.0.0-development",
-  "description": "my personal ES2015 library project skeleton",
+  "description": "intelligently create DNS entries for IP addresses or load balancers output from a CloudFormation stack",
   "main": "index.js",
   "sideEffects": false,
   "scripts": {
@@ -64,20 +64,24 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/jedwards1211/es2015-library-skeleton.git"
+    "url": "https://github.com/jcoreio/mindless-route53-cloudformation.git"
   },
   "keywords": [
-    "es2015"
+    "dns",
+    "route53",
+    "aws",
+    "cloudformation"
   ],
   "author": "Andy Edwards",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/jedwards1211/es2015-library-skeleton/issues"
+    "url": "https://github.com/jcoreio/mindless-route53-cloudformation/issues"
   },
-  "homepage": "https://github.com/jedwards1211/es2015-library-skeleton#readme",
+  "homepage": "https://github.com/jcoreio/mindless-route53-cloudformation#readme",
   "devDependencies": {
     "@babel/cli": "^7.1.5",
     "@babel/core": "^7.1.6",
+    "@babel/node": "^7.5.5",
     "@babel/plugin-proposal-class-properties": "^7.1.0",
     "@babel/plugin-proposal-export-default-from": "^7.0.0",
     "@babel/plugin-proposal-export-namespace-from": "^7.0.0",
@@ -93,8 +97,10 @@
     "@jedwards1211/eslint-config": "^2.0.0",
     "@jedwards1211/eslint-config-flow": "^1.0.2",
     "babel-eslint": "^10.0.1",
+    "babel-plugin-flow-runtime": "^0.19.0",
     "babel-plugin-istanbul": "^5.1.0",
     "chai": "^4.2.0",
+    "chai-as-promised": "^7.1.1",
     "codecov": "^3.1.0",
     "copy": "^0.3.2",
     "cross-env": "^5.2.0",
@@ -116,7 +122,14 @@
     "semantic-release": "^15.1.4"
   },
   "dependencies": {
-    "@babel/runtime": "^7.1.5"
+    "@babel/runtime": "^7.1.5",
+    "aws-sdk": "^2.499.0",
+    "chalk": "^2.4.2",
+    "flow-runtime": "^0.17.0",
+    "is-domain-name": "^1.0.1",
+    "is-ip": "^3.1.0",
+    "mindless-route53": "^1.0.1",
+    "yargs": "^13.3.0"
   },
   "renovate": {
     "extends": [

@@ -1,7 +1,10 @@
 module.exports = function(api) {
   const plugins = [
+    [
+      'babel-plugin-flow-runtime',
+      { assert: false, annotate: false, optInOnly: true },
+    ],
     '@babel/plugin-transform-flow-strip-types',
-    '@babel/plugin-syntax-dynamic-import',
     '@babel/plugin-proposal-class-properties',
     '@babel/plugin-proposal-export-default-from',
     '@babel/plugin-proposal-export-namespace-from',
