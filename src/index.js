@@ -12,6 +12,8 @@ import {
 } from './AWSTypes'
 import isDomainName from 'is-domain-name'
 
+import { upsertRecordSet } from 'mindless-route53'
+
 const isECSInstanceId = (s: string) => /^i-[a-z0-9]{17,}$/.test(s)
 const loadBalancerArnRx = /^arn:aws:elasticloadbalancing:([^:]+):(\d+):loadbalancer\/.+/
 const isLoadBalancerArn = (s: string) => loadBalancerArnRx.test(s)
@@ -131,7 +133,7 @@ async function genRecordSetsForLoadBalancer(options: {
     AliasTarget: {
       DNSName: balancer.DNSName,
       HostedZoneId: balancer.CanonicalHostedZoneId,
-      EvaluateTargetHealth: true,
+      EvaluateTargetHealth: false,
     },
   }
   return [
@@ -212,7 +214,7 @@ ${
   }`)
 }
 
-export async function genRecordSetsForStack(options: {
+export type GenRecordSetsForStackOptions = {
   StackName: string,
   DNSName: string,
   TTL?: ?number,
@@ -223,7 +225,11 @@ export async function genRecordSetsForStack(options: {
   region?: ?string,
   log?: ?(...args: any) => any,
   verbose?: ?boolean,
-}): Promise<Array<GeneratedResourceRecordSet>> {
+}
+
+export async function genRecordSetsForStack(
+  options: GenRecordSetsForStackOptions
+): Promise<Array<GeneratedResourceRecordSet>> {
   const {
     StackName,
     DNSName,
@@ -259,6 +265,41 @@ export async function genRecordSetsForStack(options: {
     log,
     verbose,
   })
+}
+
+type UpsertOptions = $Call<<T>((T) => any) => T, typeof upsertRecordSet>
+
+export type UpsertRecordSetsForStackOptions = GenRecordSetsForStackOptions & {
+  Comment?: ?string,
+  Route53?: ?AWS.Route53,
+}
+
+export async function upsertRecordSetsForStack(
+  options: UpsertRecordSetsForStackOptions
+): Promise<void> {
+  const recordSets = await genRecordSetsForStack(options)
+
+  const log = options.log || console.error.bind(console) // eslint-disable-line no-console
+  const { verbose, Comment, region } = options
+  const Route53 = options.Route53 || new AWS.Route53(region ? { region } : {})
+  await Promise.all(
+    recordSets.map(
+      async ({
+        ResourceRecordSet,
+        PrivateZone,
+      }: GeneratedResourceRecordSet): Promise<any> => {
+        const upsertOptions: UpsertOptions = {
+          Route53,
+          ResourceRecordSet,
+          PrivateZone,
+          log,
+          verbose,
+        }
+        if (Comment) upsertOptions.Comment = Comment
+        await upsertRecordSet(upsertOptions)
+      }
+    )
+  )
 }
 
 export function confirmationMessage(options: {

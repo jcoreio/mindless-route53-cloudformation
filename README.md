@@ -9,7 +9,70 @@
 Intelligently create DNS records an EC2 Instance or load balancer output from a CloudFormation stack.
 Using this command makes it easier to deal with a stack getting hosed than creating the DNS records with CloudFormation -- when something goes really wrong you can just create a new stack, and update the DNS records to point to it with this command.
 
+<!-- toc -->
+
+- [Node.js API](#nodejs-api)
+  - [`upsertRecordSetsForStack(options)`](#upsertrecordsetsforstackoptions)
+  - [`genRecordSetsForStack(options)`](#genrecordsetsforstackoptions)
+- [CLI](#cli)
+  - [`cfroute53 upsert`](#cfroute53-upsert)
+
+<!-- tocstop -->
+
 # Node.js API
+
+## `upsertRecordSetsForStack(options)`
+
+Upserts DNS records to Route 53 for either an
+EC2 Instance output by a CloudFormation stack, or a load balancer output by it.
+If there are multiple EC2 Instances and/or load balancers output by the stack,
+an error will be thrown.
+
+### `options`
+
+#### `StackName` (`string`, _required_)
+
+The name of the stack to generate DNS entries for.
+
+#### `DNSName` (`string`, _required_)
+
+The desired domain name for the DNS entries.
+
+#### `TTL` (`number`, _optional_)
+
+The time-to-live for the DNS entries (not required for load balancers)
+
+#### `region` (`string`, _optional_)
+
+The AWS region to use (unless you are passing instances of the API clients you'll have to pass the `region`)
+
+#### `CloudFormation` (`AWS.CloudFormation`, _optional_)
+
+An CloudFormation API client configured how you want.
+
+#### `EC2` (`AWS.EC2`, _optional_)
+
+An EC2 API client configured how you want.
+
+#### `ELBv2` (`AWS.ELBv2`, _optional_)
+
+An ELBv2 API client configured how you want.
+
+#### `Route53` (`AWS.Route53`, _optional_)
+
+An Route53 API client configured how you want.
+
+#### `log` (`Function`, _optional_, default: `console.error`)
+
+A logging function
+
+#### `verbose` (`boolean`, _optional_, default: `false`)
+
+Enables verbose `log` output
+
+#### Returns
+
+A `Promise` that will resolve once the upsert is complete.
 
 ## `genRecordSetsForStack(options)`
 
@@ -58,7 +121,7 @@ Enables verbose `log` output
 
 ### Returns
 
-An array of the following:
+A `Promise` to be resolved with an array of the following:
 
 ```
 {
