@@ -35,7 +35,7 @@ export type GeneratedResourceRecordSet = {
   LoadBalancerArn?: ?string,
 }
 
-async function genRecordSetsForECSInstance(options: {
+export async function genRecordSetsForECSInstance(options: {
   InstanceId: string,
   DNSName: string,
   EC2?: ?AWS.EC2,
@@ -101,7 +101,7 @@ async function genRecordSetsForECSInstance(options: {
   return result
 }
 
-async function genRecordSetsForLoadBalancer(options: {
+export async function genRecordSetsForLoadBalancer(options: {
   LoadBalancerArn: string,
   DNSName: string,
   ELBv2?: ?AWS.ELBv2,
