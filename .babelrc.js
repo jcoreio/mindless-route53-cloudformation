@@ -1,21 +1,11 @@
-module.exports = function(api) {
-  const plugins = [
-    [
-      'babel-plugin-flow-runtime',
-      { assert: false, annotate: false, optInOnly: true },
-    ],
-    '@babel/plugin-transform-flow-strip-types',
-    '@babel/plugin-proposal-class-properties',
-    '@babel/plugin-proposal-export-default-from',
-    '@babel/plugin-proposal-export-namespace-from',
-    '@babel/plugin-proposal-object-rest-spread',
-  ]
+module.exports = function (api) {
+  const plugins = []
   const presets = [
     [
       '@babel/preset-env',
       api.env('es5')
         ? { forceAllTransforms: true }
-        : { targets: { node: 'current' } },
+        : { targets: { node: '12' } },
     ],
     '@babel/preset-flow',
   ]

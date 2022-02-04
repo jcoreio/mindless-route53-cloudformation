@@ -13,7 +13,7 @@ yargs
   .command(
     'upsert',
     'upsert a resource record set for a given stack',
-    function(yargs: any) {
+    function (yargs: any) {
       yargs
         .usage(
           '$0 upsert <stack name> <domain name> --region <AWS region> [--ttl <time to live>]'
@@ -47,22 +47,20 @@ yargs
           describe: `don't ask for confirmation`,
         })
     },
-    async function(argv: any) {
+    async function (argv: any) {
       const { ttl: TTL, comment: Comment, region, quiet, verbose, yes } = argv
       const args = argv._.slice(1)
 
       const StackName = args.find(
-        arg => !isDomainName(arg) || arg.indexOf('.') < 0
+        (arg) => !isDomainName(arg) || arg.indexOf('.') < 0
       )
       const DNSName = args.find(
-        arg => isDomainName(arg) && arg.indexOf('.') >= 0
+        (arg) => isDomainName(arg) && arg.indexOf('.') >= 0
       )
 
       if (!StackName || !DNSName) {
         console.log(
-          `Usage: ${process.argv[0]} ${
-            process.argv[1]
-          } <stack name> <domain name>`
+          `Usage: ${process.argv[0]} ${process.argv[1]} <stack name> <domain name>`
         )
         process.exit(1)
         return

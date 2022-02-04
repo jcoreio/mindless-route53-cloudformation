@@ -1,8 +1,7 @@
+// $FlowFixMe
 // @flow
-// @flow-runtime enable
 
-import { reify } from 'flow-runtime'
-import type { Type } from 'flow-runtime'
+import * as t from 'typed-validators'
 
 export type ResourceRecord = {
   Value: string,
@@ -59,16 +58,59 @@ export type StackOutput = {
   ExportName?: ?string,
 }
 
+export const StackOutputType: t.TypeAlias<StackOutput> = t.alias(
+  'StackOutput',
+  t.object({
+    exact: false,
+
+    required: {
+      OutputKey: t.string(),
+    },
+
+    optional: {
+      OutputValue: t.nullishOr(t.string()),
+      Description: t.nullishOr(t.string()),
+      ExportName: t.nullishOr(t.string()),
+    },
+  })
+)
+
 export type StackDescription = {
   StackName: string,
   Outputs?: ?Array<StackOutput>,
 }
 
+export const StackDescriptionType: t.TypeAlias<StackDescription> = t.alias(
+  'StackDescription',
+  t.object({
+    exact: false,
+
+    required: {
+      StackName: t.string(),
+    },
+
+    optional: {
+      Outputs: t.nullishOr(t.array(t.ref(() => StackOutputType))),
+    },
+  })
+)
+
 export type DescribeStacksResponse = {
   Stacks: Array<StackDescription>,
 }
 
-export const DescribeStacksResponseType = (reify: Type<DescribeStacksResponse>)
+// $FlowFixMe
+export const DescribeStacksResponseType: t.TypeAlias<DescribeStacksResponse> =
+  t.alias(
+    'DescribeStacksResponse',
+    t.object({
+      exact: false,
+
+      required: {
+        Stacks: t.array(t.ref(() => StackDescriptionType)),
+      },
+    })
+  )
 
 export type InstanceDescription = {
   PrivateIpAddress?: ?string,
@@ -82,15 +124,65 @@ export type InstanceDescription = {
   VpcId: string,
 }
 
+export const InstanceDescriptionType: t.TypeAlias<InstanceDescription> =
+  t.alias(
+    'InstanceDescription',
+    t.object({
+      exact: false,
+
+      required: {
+        State: t.object({
+          exact: false,
+
+          required: {
+            Code: t.number(),
+            Name: t.string(),
+          },
+        }),
+
+        SubnetId: t.string(),
+        VpcId: t.string(),
+      },
+
+      optional: {
+        PrivateIpAddress: t.nullishOr(t.string()),
+        PublicIpAddress: t.nullishOr(t.string()),
+        StateTransitionReason: t.nullishOr(t.string()),
+      },
+    })
+  )
+
 export type ReservationDescription = {
   Instances?: Array<InstanceDescription>,
 }
+
+export const ReservationDescriptionType: t.TypeAlias<ReservationDescription> =
+  t.alias(
+    'ReservationDescription',
+    t.object({
+      exact: false,
+
+      optional: {
+        Instances: t.array(t.ref(() => InstanceDescriptionType)),
+      },
+    })
+  )
 
 export type DescribeInstancesResponse = {
   Reservations: Array<ReservationDescription>,
 }
 
-export const DescribeInstancesResponseType = (reify: Type<DescribeInstancesResponse>)
+export const DescribeInstancesResponseType: t.TypeAlias<DescribeInstancesResponse> =
+  t.alias(
+    'DescribeInstancesResponse',
+    t.object({
+      exact: false,
+
+      required: {
+        Reservations: t.array(t.ref(() => ReservationDescriptionType)),
+      },
+    })
+  )
 
 export type LoadBalancerDescription = {
   LoadBalancerArn: string,
@@ -98,8 +190,32 @@ export type LoadBalancerDescription = {
   CanonicalHostedZoneId: string,
 }
 
+export const LoadBalancerDescriptionType: t.TypeAlias<LoadBalancerDescription> =
+  t.alias(
+    'LoadBalancerDescription',
+    t.object({
+      exact: false,
+
+      required: {
+        LoadBalancerArn: t.string(),
+        DNSName: t.string(),
+        CanonicalHostedZoneId: t.string(),
+      },
+    })
+  )
+
 export type DescribeLoadBalancersResponse = {
   LoadBalancers: Array<LoadBalancerDescription>,
 }
 
-export const DescribeLoadBalancersResponseType = (reify: Type<DescribeLoadBalancersResponse>)
+export const DescribeLoadBalancersResponseType: t.TypeAlias<DescribeLoadBalancersResponse> =
+  t.alias(
+    'DescribeLoadBalancersResponse',
+    t.object({
+      exact: false,
+
+      required: {
+        LoadBalancers: t.array(t.ref(() => LoadBalancerDescriptionType)),
+      },
+    })
+  )

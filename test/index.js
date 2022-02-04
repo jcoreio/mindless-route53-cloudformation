@@ -85,7 +85,7 @@ const EC2 = {
     promise: async () => ({
       Reservations: [
         {
-          Instances: InstanceIds.map(id => ec2Instances[id]).filter(Boolean),
+          Instances: InstanceIds.map((id) => ec2Instances[id]).filter(Boolean),
         },
       ],
     }),
@@ -101,7 +101,7 @@ const loadBalancers = {
 const ELBv2 = {
   describeLoadBalancers: ({ LoadBalancerArns }) => ({
     promise: async () => ({
-      LoadBalancers: LoadBalancerArns.map(arn => loadBalancers[arn]).filter(
+      LoadBalancers: LoadBalancerArns.map((arn) => loadBalancers[arn]).filter(
         Boolean
       ),
     }),
@@ -140,7 +140,7 @@ const Route53 = {
   listHostedZonesByName: ({ DNSName, HostedZoneId }) => ({
     promise: async (): Promise<ListHostedZonesByNameResponse> => {
       const i = zones.findIndex(
-        z =>
+        (z) =>
           z.Id === HostedZoneId || z.Name.endsWith(DNSName.replace(/\.?$/, '.'))
       )
       return i < 0
@@ -153,7 +153,7 @@ const Route53 = {
           }
     },
   }),
-  changeResourceRecordSets: arg => ({
+  changeResourceRecordSets: (arg) => ({
     promise: async (): Promise<any> => {
       changeResourceRecordSetsArgs.push(arg)
       return { ChangeInfo: { Id: 'xxxxxx' } }
@@ -166,8 +166,8 @@ beforeEach(() => {
   changeResourceRecordSetsArgs.length = 0
 })
 
-describe(`genRecordSetsForStack`, function() {
-  it(`works for EC2 instance output`, async function() {
+describe(`genRecordSetsForStack`, function () {
+  it(`works for EC2 instance output`, async function () {
     expect(
       await genRecordSetsForStack({
         StackName: 'ec2Instance',
@@ -208,7 +208,7 @@ describe(`genRecordSetsForStack`, function() {
       },
     ])
   })
-  it(`works for load balancer output`, async function() {
+  it(`works for load balancer output`, async function () {
     expect(
       await genRecordSetsForStack({
         StackName: 'loadBalancer',
@@ -249,7 +249,7 @@ describe(`genRecordSetsForStack`, function() {
       },
     ])
   })
-  it(`rejects if no addressable outputs are found`, async function() {
+  it(`rejects if no addressable outputs are found`, async function () {
     await expect(
       genRecordSetsForStack({
         StackName: 'noAddressable',
@@ -262,7 +262,7 @@ describe(`genRecordSetsForStack`, function() {
       // $FlowFixMe
     ).to.be.rejectedWith(Error, 'No addressable outputs found')
   })
-  it(`rejects if multiple addressable outputs are found`, async function() {
+  it(`rejects if multiple addressable outputs are found`, async function () {
     await expect(
       genRecordSetsForStack({
         StackName: 'multipleAddressable',
@@ -276,8 +276,8 @@ describe(`genRecordSetsForStack`, function() {
     ).to.be.rejectedWith(Error, /Multiple addressable outputs found!/)
   })
 })
-describe(`upsertRecordSetsForStack`, function() {
-  it(`works for EC2 instance output`, async function() {
+describe(`upsertRecordSetsForStack`, function () {
+  it(`works for EC2 instance output`, async function () {
     const DNSName = 'test.foo.com'
     const TTL = 360
     await upsertRecordSetsForStack({
@@ -335,7 +335,7 @@ describe(`upsertRecordSetsForStack`, function() {
       },
     ])
   })
-  it(`works for load balancer output`, async function() {
+  it(`works for load balancer output`, async function () {
     const DNSName = 'test.foo.com'
     await upsertRecordSetsForStack({
       StackName: 'loadBalancer',
@@ -391,7 +391,7 @@ describe(`upsertRecordSetsForStack`, function() {
       },
     ])
   })
-  it(`rejects if no addressable outputs are found`, async function() {
+  it(`rejects if no addressable outputs are found`, async function () {
     await expect(
       upsertRecordSetsForStack({
         StackName: 'noAddressable',
@@ -406,7 +406,7 @@ describe(`upsertRecordSetsForStack`, function() {
     ).to.be.rejectedWith(Error, 'No addressable outputs found')
     expect(changeResourceRecordSetsArgs).to.have.lengthOf(0)
   })
-  it(`rejects if multiple addressable outputs are found`, async function() {
+  it(`rejects if multiple addressable outputs are found`, async function () {
     await expect(
       upsertRecordSetsForStack({
         StackName: 'multipleAddressable',

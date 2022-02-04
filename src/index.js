@@ -15,17 +15,24 @@ import isDomainName from 'is-domain-name'
 import { upsertRecordSet } from 'mindless-route53'
 
 const isECSInstanceId = (s: string) => /^i-[a-z0-9]{17,}$/.test(s)
-const loadBalancerArnRx = /^arn:aws:elasticloadbalancing:([^:]+):(\d+):loadbalancer\/.+/
+const loadBalancerArnRx =
+  /^arn:aws:elasticloadbalancing:([^:]+):(\d+):loadbalancer\/.+/
 const isLoadBalancerArn = (s: string) => loadBalancerArnRx.test(s)
 
 function isEmpty(collection: Object): boolean {
   for (let key in collection) {
-    if (collection.hasOwnProperty(key)) {
+    // $FlowFixMe
+    if (Object.prototype.hasOwnProperty.call(collection, key)) {
       return false
     }
   }
   return true
 }
+
+type AWSEC2 = any
+type AWSELBv2 = any
+type AWSCloudFormation = any
+type AWSRoute53 = any
 
 export type GeneratedResourceRecordSet = {
   ResourceRecordSet: ResourceRecordSet,
@@ -38,7 +45,7 @@ export type GeneratedResourceRecordSet = {
 export async function genRecordSetsForECSInstance(options: {
   InstanceId: string,
   DNSName: string,
-  EC2?: ?AWS.EC2,
+  EC2?: ?AWSEC2,
   TTL?: ?number,
   region?: ?string,
   log?: ?(...args: any) => any,
@@ -104,7 +111,7 @@ export async function genRecordSetsForECSInstance(options: {
 export async function genRecordSetsForLoadBalancer(options: {
   LoadBalancerArn: string,
   DNSName: string,
-  ELBv2?: ?AWS.ELBv2,
+  ELBv2?: ?AWSELBv2,
   log?: ?(...args: any) => any,
   region?: ?string,
   verbose?: ?boolean,
@@ -154,8 +161,8 @@ export async function genRecordSetsForStackOutputs(options: {
   Outputs: Array<StackOutput>,
   DNSName: string,
   TTL?: ?number,
-  EC2?: ?AWS.EC2,
-  ELBv2?: ?AWS.ELBv2,
+  EC2?: ?AWSEC2,
+  ELBv2?: ?AWSELBv2,
   region?: ?string,
   log?: ?(...args: any) => any,
   verbose?: ?boolean,
@@ -184,7 +191,9 @@ export async function genRecordSetsForStackOutputs(options: {
         log,
         verbose,
       })
-      result.forEach(item => (item.OutputKey = Object.keys(ecsInstanceIds)[0]))
+      result.forEach(
+        (item) => (item.OutputKey = Object.keys(ecsInstanceIds)[0])
+      )
       return result
     } else {
       const result = await genRecordSetsForLoadBalancer({
@@ -196,22 +205,22 @@ export async function genRecordSetsForStackOutputs(options: {
         verbose,
       })
       result.forEach(
-        item => (item.OutputKey = Object.keys(loadBalancerArns)[0])
+        (item) => (item.OutputKey = Object.keys(loadBalancerArns)[0])
       )
       return result
     }
   }
   throw new Error(`Multiple addressable outputs found!
 ${
-    isEmpty(ecsInstanceIds)
-      ? ''
-      : `ECS Instances:\n  ${Object.values(ecsInstanceIds).join('\n  ')}`
-  }
+  isEmpty(ecsInstanceIds)
+    ? ''
+    : `ECS Instances:\n  ${Object.values(ecsInstanceIds).join('\n  ')}`
+}
 ${
-    isEmpty(loadBalancerArns)
-      ? ''
-      : `Load Balancers:\n  ${Object.values(loadBalancerArns).join('\n  ')}`
-  }`)
+  isEmpty(loadBalancerArns)
+    ? ''
+    : `Load Balancers:\n  ${Object.values(loadBalancerArns).join('\n  ')}`
+}`)
 }
 
 export type GenRecordSetsForStackOptions = {
@@ -219,9 +228,9 @@ export type GenRecordSetsForStackOptions = {
   DNSName: string,
   TTL?: ?number,
   interactive?: ?boolean,
-  CloudFormation?: ?AWS.CloudFormation,
-  EC2?: ?AWS.EC2,
-  ELBv2?: ?AWS.ELBv2,
+  CloudFormation?: ?AWSCloudFormation,
+  EC2?: ?AWSEC2,
+  ELBv2?: ?AWSELBv2,
   region?: ?string,
   log?: ?(...args: any) => any,
   verbose?: ?boolean,
@@ -230,16 +239,8 @@ export type GenRecordSetsForStackOptions = {
 export async function genRecordSetsForStack(
   options: GenRecordSetsForStackOptions
 ): Promise<Array<GeneratedResourceRecordSet>> {
-  const {
-    StackName,
-    DNSName,
-    interactive,
-    EC2,
-    ELBv2,
-    verbose,
-    region,
-    TTL,
-  } = options
+  const { StackName, DNSName, interactive, EC2, ELBv2, verbose, region, TTL } =
+    options
   const log = options.log || console.error.bind(console) // eslint-disable-line no-console
   const CloudFormation =
     options.CloudFormation || new AWS.CloudFormation(region ? { region } : {})
@@ -271,7 +272,7 @@ type UpsertOptions = $Call<<T>((T) => any) => T, typeof upsertRecordSet>
 
 export type UpsertRecordSetsForStackOptions = GenRecordSetsForStackOptions & {
   Comment?: ?string,
-  Route53?: ?AWS.Route53,
+  Route53?: ?AWSRoute53,
 }
 
 export async function upsertRecordSetsForStack(
@@ -311,24 +312,24 @@ export function confirmationMessage(options: {
   return `These are the DNS records that will be upserted for stack ${StackName}:
 
 ${recordSets
-    .map(
-      ({
-        ResourceRecordSet,
-        PrivateZone,
-        OutputKey,
-        InstanceId,
-        LoadBalancerArn,
-      }: GeneratedResourceRecordSet) =>
-        `${chalk.bold(ResourceRecordSet.Name)} (${
-          PrivateZone ? 'private' : 'public'
-        } zone)
+  .map(
+    ({
+      ResourceRecordSet,
+      PrivateZone,
+      OutputKey,
+      InstanceId,
+      LoadBalancerArn,
+    }: GeneratedResourceRecordSet) =>
+      `${chalk.bold(ResourceRecordSet.Name)} (${
+        PrivateZone ? 'private' : 'public'
+      } zone)
   from stack output [${String(OutputKey)}]: ${String(
-          InstanceId || LoadBalancerArn
-        )}:
+        InstanceId || LoadBalancerArn
+      )}:
 ${JSON.stringify(ResourceRecordSet, null, 2).replace(/^/gm, '  ')}
 `
-    )
-    .join('\n')}
+  )
+  .join('\n')}
   `
   /* eslint-enable no-console */
 }
@@ -336,8 +337,10 @@ ${JSON.stringify(ResourceRecordSet, null, 2).replace(/^/gm, '  ')}
 if (!module.parent) {
   /* eslint-disable no-console */
   const argv = process.argv.slice(2)
-  const StackName = argv.find(arg => !isDomainName(arg) || arg.indexOf('.') < 0)
-  const DNSName = argv.find(arg => isDomainName(arg) && arg.indexOf('.') >= 0)
+  const StackName = argv.find(
+    (arg) => !isDomainName(arg) || arg.indexOf('.') < 0
+  )
+  const DNSName = argv.find((arg) => isDomainName(arg) && arg.indexOf('.') >= 0)
   if (!StackName || !DNSName) {
     console.log(
       `Usage: ${process.argv[0]} ${process.argv[1]} <stack name> <domain name>`
@@ -350,7 +353,7 @@ if (!module.parent) {
       region: 'us-west-2',
       verbose: false,
     }).then(
-      r => console.log(confirmationMessage({ StackName, recordSets: r })),
+      (r) => console.log(confirmationMessage({ StackName, recordSets: r })),
       console.error
     ) // eslint-disable-line no-console
   }
