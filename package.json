@@ -120,7 +120,7 @@
   "dependencies": {
     "@babel/runtime": "^7.15.4",
     "@types/node": "^17.0.14",
-    "aws-sdk": "^2.499.0",
+    "aws-sdk": "^2.1000.0",
     "chalk": "^2.4.2",
     "inquirer": "^6.5.0",
     "is-domain-name": "^1.0.1",

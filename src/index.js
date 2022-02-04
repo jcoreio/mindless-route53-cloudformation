@@ -48,12 +48,14 @@ export async function genRecordSetsForECSInstance(options: {
   EC2?: ?AWSEC2,
   TTL?: ?number,
   region?: ?string,
+  awsConfig?: ?{ ... },
   log?: ?(...args: any) => any,
   verbose?: ?boolean,
 }): Promise<Array<GeneratedResourceRecordSet>> {
   const { InstanceId, DNSName, TTL, verbose, region } = options
+  const awsConfig = options.awsConfig || { ...(region ? { region } : {}) }
   const log = options.log || console.error.bind(console) // eslint-disable-line no-console
-  const EC2 = options.EC2 || new AWS.EC2(region ? { region } : {})
+  const EC2 = options.EC2 || new AWS.EC2(awsConfig)
   if (verbose) log(`Describing EC2 Instance: ${InstanceId}...`)
   const response: DescribeInstancesResponse = await EC2.describeInstances({
     InstanceIds: [InstanceId],
@@ -114,11 +116,13 @@ export async function genRecordSetsForLoadBalancer(options: {
   ELBv2?: ?AWSELBv2,
   log?: ?(...args: any) => any,
   region?: ?string,
+  awsConfig?: ?{ ... },
   verbose?: ?boolean,
 }): Promise<Array<GeneratedResourceRecordSet>> {
   const { LoadBalancerArn, DNSName, verbose, region } = options
+  const awsConfig = options.awsConfig || { ...(region ? { region } : {}) }
   const log = options.log || console.error.bind(console) // eslint-disable-line no-console
-  const ELBv2 = options.ELBv2 || new AWS.ELBv2(region ? { region } : {})
+  const ELBv2 = options.ELBv2 || new AWS.ELBv2(awsConfig)
   if (verbose) log(`Describing load balancer: ${LoadBalancerArn}...`)
   const response = await ELBv2.describeLoadBalancers({
     LoadBalancerArns: [LoadBalancerArn],
@@ -164,10 +168,12 @@ export async function genRecordSetsForStackOutputs(options: {
   EC2?: ?AWSEC2,
   ELBv2?: ?AWSELBv2,
   region?: ?string,
+  awsConfig?: ?{ ... },
   log?: ?(...args: any) => any,
   verbose?: ?boolean,
 }): Promise<Array<GeneratedResourceRecordSet>> {
-  const { Outputs, DNSName, TTL, EC2, ELBv2, region, verbose } = options
+  const { Outputs, DNSName, TTL, EC2, ELBv2, awsConfig, region, verbose } =
+    options
   const log = options.log || console.error.bind(console) // eslint-disable-line no-console
   const ecsInstanceIds: { [string]: string } = {}
   const loadBalancerArns: { [string]: string } = {}
@@ -187,6 +193,7 @@ export async function genRecordSetsForStackOutputs(options: {
         DNSName,
         TTL,
         EC2,
+        awsConfig,
         region,
         log,
         verbose,
@@ -200,6 +207,7 @@ export async function genRecordSetsForStackOutputs(options: {
         LoadBalancerArn: (Object.values(loadBalancerArns)[0]: any),
         DNSName,
         ELBv2,
+        awsConfig,
         region,
         log,
         verbose,
@@ -232,6 +240,7 @@ export type GenRecordSetsForStackOptions = {
   EC2?: ?AWSEC2,
   ELBv2?: ?AWSELBv2,
   region?: ?string,
+  awsConfig?: ?{ ... },
   log?: ?(...args: any) => any,
   verbose?: ?boolean,
 }
@@ -241,9 +250,10 @@ export async function genRecordSetsForStack(
 ): Promise<Array<GeneratedResourceRecordSet>> {
   const { StackName, DNSName, interactive, EC2, ELBv2, verbose, region, TTL } =
     options
+  const awsConfig = options.awsConfig || { ...(region ? { region } : {}) }
   const log = options.log || console.error.bind(console) // eslint-disable-line no-console
   const CloudFormation =
-    options.CloudFormation || new AWS.CloudFormation(region ? { region } : {})
+    options.CloudFormation || new AWS.CloudFormation(awsConfig)
   if (verbose) log(`Describing CloudFormation stack: ${StackName}`)
   const response = await CloudFormation.describeStacks({
     StackName,
@@ -262,6 +272,7 @@ export async function genRecordSetsForStack(
     interactive,
     EC2,
     ELBv2,
+    awsConfig,
     region,
     log,
     verbose,
@@ -273,6 +284,7 @@ type UpsertOptions = $Call<<T>((T) => any) => T, typeof upsertRecordSet>
 export type UpsertRecordSetsForStackOptions = GenRecordSetsForStackOptions & {
   Comment?: ?string,
   Route53?: ?AWSRoute53,
+  awsConfig?: ?{ ... },
 }
 
 export async function upsertRecordSetsForStack(
@@ -281,8 +293,8 @@ export async function upsertRecordSetsForStack(
   const recordSets = await genRecordSetsForStack(options)
 
   const log = options.log || console.error.bind(console) // eslint-disable-line no-console
-  const { verbose, Comment, region } = options
-  const Route53 = options.Route53 || new AWS.Route53(region ? { region } : {})
+  const { verbose, Comment, region, Route53 } = options
+  const awsConfig = options.awsConfig || { ...(region ? { region } : {}) }
   await Promise.all(
     recordSets.map(
       async ({
@@ -291,6 +303,7 @@ export async function upsertRecordSetsForStack(
       }: GeneratedResourceRecordSet): Promise<any> => {
         const upsertOptions: UpsertOptions = {
           Route53,
+          awsConfig,
           ResourceRecordSet,
           PrivateZone,
           log,

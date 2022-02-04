@@ -30,6 +30,10 @@ an error will be thrown.
 
 ### `options`
 
+#### `awsConfig` (`AWS.ConfigurationOptions`, _optional_)
+
+The general configuration options for AWS services, like `credentials` and `region`
+
 #### `StackName` (`string`, _required_)
 
 The name of the stack to generate DNS entries for.
@@ -82,6 +86,10 @@ If there are multiple EC2 Instances and/or load balancers output by the stack,
 an error will be thrown.
 
 ### `options`
+
+#### `awsConfig` (`AWS.ConfigurationOptions`, _optional_)
+
+The general configuration options for AWS services, like `credentials` and `region`
 
 #### `StackName` (`string`, _required_)
 

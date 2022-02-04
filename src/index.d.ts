@@ -15,6 +15,7 @@ export function genRecordSetsForECSInstance(options: {
   EC2?: AWS.EC2 | null
   TTL?: number | null
   region?: string | null
+  awsConfig?: AWS.ConfigurationOptions | null
   log?: null | ((...args: any) => any)
   verbose?: boolean | null
 }): Promise<Array<GeneratedResourceRecordSet>>
@@ -25,6 +26,7 @@ export function genRecordSetsForLoadBalancer(options: {
   ELBv2?: AWS.ELBv2 | null
   log?: null | ((...args: any) => any)
   region?: string | null
+  awsConfig?: AWS.ConfigurationOptions | null
   verbose?: boolean | null
 }): Promise<Array<GeneratedResourceRecordSet>>
 
@@ -35,6 +37,7 @@ export function genRecordSetsForStackOutputs(options: {
   EC2?: AWS.EC2 | null
   ELBv2?: AWS.ELBv2 | null
   region?: string | null
+  awsConfig?: AWS.ConfigurationOptions | null
   log?: null | ((...args: any) => any)
   verbose?: boolean | null
 }): Promise<Array<GeneratedResourceRecordSet>>
@@ -48,6 +51,7 @@ export type GenRecordSetsForStackOptions = {
   EC2?: AWS.EC2 | null
   ELBv2?: AWS.ELBv2 | null
   region?: string | null
+  awsConfig?: AWS.ConfigurationOptions | null
   log?: null | ((...args: any) => any)
   verbose?: boolean | null
 }
