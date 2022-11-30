@@ -18,6 +18,11 @@ yargs
         .usage(
           '$0 upsert <stack name> <domain name> --region <AWS region> [--ttl <time to live>]'
         )
+        .option('p', {
+          alias: 'private-only',
+          type: 'boolean',
+          describe: 'only create private DNS records',
+        })
         .option('ttl', {
           type: 'number',
           describe: 'the time-to-live for the record',
@@ -48,7 +53,15 @@ yargs
         })
     },
     async function (argv: any) {
-      const { ttl: TTL, comment: Comment, region, quiet, verbose, yes } = argv
+      const {
+        p: privateOnly,
+        ttl: TTL,
+        comment: Comment,
+        region,
+        quiet,
+        verbose,
+        yes,
+      } = argv
       const args = argv._.slice(1)
 
       const StackName = args.find(
@@ -71,6 +84,7 @@ yargs
       const recordSets = await genRecordSetsForStack({
         StackName,
         DNSName,
+        privateOnly,
         TTL,
         region,
         log,

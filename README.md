@@ -42,6 +42,11 @@ The name of the stack to generate DNS entries for.
 
 The desired domain name for the DNS entries.
 
+#### `privateOnly` (`boolean`, _optional_)
+
+`true` if only private zone DNS records should be created, `false` if both public and private
+records should be created. Defaults to `false`.
+
 #### `TTL` (`number`, _optional_)
 
 The time-to-live for the DNS entries (not required for load balancers)
@@ -98,6 +103,11 @@ The name of the stack to generate DNS entries for.
 #### `DNSName` (`string`, _required_)
 
 The desired domain name for the DNS entries.
+
+#### `privateOnly` (`boolean`, _optional_)
+
+`true` if only private zone DNS records should be created, `false` if both public and private
+records should be created. Defaults to `false`.
 
 #### `TTL` (`number`, _optional_)
 
@@ -164,18 +174,19 @@ If there are multiple EC2 Instances and/or load balancers output by the stack, t
 ### Usage
 
 ```
-cfroute53 upsert <stack name> <domain name> --region <AWS region> [--ttl <time to live>]
+cfroute53 upsert <stack name> <domain name> --region <AWS region> [--private-only] [--ttl <time to live>]
 ```
 
 ### Options
 
 ```
---version      Show version number                                   [boolean]
---help         Show help                                             [boolean]
---ttl          the time-to-live for the record                        [number]
--c, --comment  a comment for the change                               [string]
---region       the AWS region                                         [string]
--q, --quiet    suppress output                                       [boolean]
--v, --verbose  enable verbose output                                 [boolean]
--y, --yes      don't ask for confirmation                            [boolean]
+--version           Show version number                              [boolean]
+--help              Show help                                        [boolean]
+-p, --private-only  only create private zone DNS records             [boolean]
+--ttl               the time-to-live for the record                   [number]
+-c, --comment       a comment for the change                          [string]
+--region            the AWS region                                    [string]
+-q, --quiet         suppress output                                  [boolean]
+-v, --verbose       enable verbose output                            [boolean]
+-y, --yes           don't ask for confirmation                       [boolean]
 ```
