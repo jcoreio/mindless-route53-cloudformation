@@ -18,8 +18,7 @@ yargs
         .usage(
           '$0 upsert <stack name> <domain name> --region <AWS region> [--ttl <time to live>]'
         )
-        .option('p', {
-          alias: 'private-only',
+        .option('private-only', {
           type: 'boolean',
           describe: 'only create private DNS records',
         })
@@ -54,7 +53,7 @@ yargs
     },
     async function (argv: any) {
       const {
-        p: privateOnly,
+        privateOnly,
         ttl: TTL,
         comment: Comment,
         region,
