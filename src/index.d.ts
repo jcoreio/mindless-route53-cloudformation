@@ -13,6 +13,7 @@ export function genRecordSetsForECSInstance(options: {
   InstanceId: string
   DNSName: string
   EC2?: AWS.EC2 | null
+  publicOnly?: boolean | null
   privateOnly?: boolean | null
   TTL?: number | null
   region?: string | null
@@ -24,6 +25,7 @@ export function genRecordSetsForECSInstance(options: {
 export function genRecordSetsForLoadBalancer(options: {
   LoadBalancerArn: string
   DNSName: string
+  publicOnly?: boolean | null
   privateOnly?: boolean | null
   ELBv2?: AWS.ELBv2 | null
   log?: null | ((...args: any) => any)
@@ -35,6 +37,7 @@ export function genRecordSetsForLoadBalancer(options: {
 export function genRecordSetsForStackOutputs(options: {
   Outputs: Array<StackOutput>
   DNSName: string
+  publicOnly?: boolean | null
   privateOnly?: boolean | null
   TTL?: number | null
   EC2?: AWS.EC2 | null
@@ -48,6 +51,7 @@ export function genRecordSetsForStackOutputs(options: {
 export type GenRecordSetsForStackOptions = {
   StackName: string
   DNSName: string
+  publicOnly?: boolean | null
   privateOnly?: boolean | null
   TTL?: number | null
   interactive?: boolean | null
