@@ -2,13 +2,12 @@
 // @flow
 
 /* eslint-disable no-console */
-
 import yargs from 'yargs'
 import { upsertRecordSet } from 'mindless-route53'
+// @ts-expect-error no type defs
 import isDomainName from 'is-domain-name'
 import inquirer from 'inquirer'
 import { genRecordSetsForStack, confirmationMessage } from './index'
-
 yargs
   .command(
     'upsert',
@@ -62,14 +61,12 @@ yargs
         yes,
       } = argv
       const args = argv._.slice(1)
-
       const StackName = args.find(
-        (arg) => !isDomainName(arg) || arg.indexOf('.') < 0
+        (arg: any) => !isDomainName(arg) || arg.indexOf('.') < 0
       )
       const DNSName = args.find(
-        (arg) => isDomainName(arg) && arg.indexOf('.') >= 0
+        (arg: any) => isDomainName(arg) && arg.indexOf('.') >= 0
       )
-
       if (!StackName || !DNSName) {
         console.log(
           `Usage: ${process.argv[0]} ${process.argv[1]} <stack name> <domain name>`
@@ -77,9 +74,7 @@ yargs
         process.exit(1)
         return
       }
-
       const log = quiet ? () => {} : console.error.bind(console)
-
       const recordSets = await genRecordSetsForStack({
         StackName,
         DNSName,
@@ -89,9 +84,13 @@ yargs
         log,
         verbose,
       })
-
       if (!yes) {
-        console.log(confirmationMessage({ StackName, recordSets }))
+        console.log(
+          confirmationMessage({
+            StackName,
+            recordSets,
+          })
+        )
         const { ok } = await inquirer.prompt([
           {
             type: 'confirm',
@@ -101,7 +100,6 @@ yargs
         ])
         if (!ok) return
       }
-
       await Promise.all(
         recordSets.map(({ ResourceRecordSet, PrivateZone }) =>
           upsertRecordSet({
@@ -118,5 +116,4 @@ yargs
   .demandCommand()
   .version()
   .help()
-
 yargs.argv
