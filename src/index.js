@@ -10,7 +10,6 @@ import {
   DescribeStacksResponseType,
   DescribeLoadBalancersResponseType,
 } from './AWSTypes'
-import isDomainName from 'is-domain-name'
 
 import { upsertRecordSet } from 'mindless-route53'
 
@@ -374,29 +373,4 @@ ${JSON.stringify(ResourceRecordSet, null, 2).replace(/^/gm, '  ')}
   .join('\n')}
   `
   /* eslint-enable no-console */
-}
-
-if (!module.parent) {
-  /* eslint-disable no-console */
-  const argv = process.argv.slice(2)
-  const StackName = argv.find(
-    (arg) => !isDomainName(arg) || arg.indexOf('.') < 0
-  )
-  const DNSName = argv.find((arg) => isDomainName(arg) && arg.indexOf('.') >= 0)
-  if (!StackName || !DNSName) {
-    console.log(
-      `Usage: ${process.argv[0]} ${process.argv[1]} <stack name> <domain name>`
-    )
-    process.exit(1)
-  } else {
-    genRecordSetsForStack({
-      StackName,
-      DNSName,
-      region: 'us-west-2',
-      verbose: false,
-    }).then(
-      (r) => console.log(confirmationMessage({ StackName, recordSets: r })),
-      console.error
-    ) // eslint-disable-line no-console
-  }
 }
