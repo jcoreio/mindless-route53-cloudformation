@@ -43,6 +43,7 @@ export async function genRecordSetsForECSInstance(options: {
   InstanceId: string
   DNSName: string
   EC2?: EC2Client
+  publicOnly?: boolean
   privateOnly?: boolean
   TTL?: number
   region?: string
@@ -50,7 +51,8 @@ export async function genRecordSetsForECSInstance(options: {
   log?: (...args: any) => any
   verbose?: boolean
 }): Promise<Array<GeneratedResourceRecordSet>> {
-  const { InstanceId, DNSName, privateOnly, TTL, verbose, region } = options
+  const { InstanceId, DNSName, publicOnly, privateOnly, TTL, verbose, region } =
+    options
   const awsConfig = options.awsConfig || {
     ...(region
       ? {
@@ -100,7 +102,7 @@ export async function genRecordSetsForECSInstance(options: {
       PrivateZone: false,
     })
   }
-  if (PrivateIpAddress) {
+  if (PrivateIpAddress && !publicOnly) {
     result.push({
       ResourceRecordSet: {
         Name: DNSName,
@@ -125,6 +127,7 @@ export async function genRecordSetsForECSInstance(options: {
 export async function genRecordSetsForLoadBalancer(options: {
   LoadBalancerArn: string
   DNSName: string
+  publicOnly?: boolean
   privateOnly?: boolean
   ELBv2?: ElasticLoadBalancingV2Client
   log?: (...args: any) => any
@@ -132,7 +135,8 @@ export async function genRecordSetsForLoadBalancer(options: {
   awsConfig?: ElasticLoadBalancingV2ClientConfig
   verbose?: boolean
 }): Promise<Array<GeneratedResourceRecordSet>> {
-  const { LoadBalancerArn, DNSName, privateOnly, verbose, region } = options
+  const { LoadBalancerArn, DNSName, publicOnly, privateOnly, verbose, region } =
+    options
   const awsConfig = options.awsConfig || {
     ...(region
       ? {
@@ -177,16 +181,15 @@ export async function genRecordSetsForLoadBalancer(options: {
             PrivateZone: false,
           },
         ]),
-    {
-      ResourceRecordSet,
-      LoadBalancerArn,
-      PrivateZone: true,
-    },
+    ...(publicOnly
+      ? []
+      : [{ ResourceRecordSet, LoadBalancerArn, PrivateZone: true }]),
   ]
 }
 export async function genRecordSetsForStackOutputs(options: {
   Outputs: Array<Output>
   DNSName: string
+  publicOnly?: boolean
   privateOnly?: boolean
   TTL?: number
   EC2?: EC2Client
@@ -199,6 +202,7 @@ export async function genRecordSetsForStackOutputs(options: {
   const {
     Outputs,
     DNSName,
+    publicOnly,
     privateOnly,
     TTL,
     EC2,
@@ -228,6 +232,7 @@ export async function genRecordSetsForStackOutputs(options: {
       const result = await genRecordSetsForECSInstance({
         InstanceId: Object.values(ecsInstanceIds)[0] as any,
         DNSName,
+        publicOnly,
         privateOnly,
         TTL,
         EC2,
@@ -244,6 +249,7 @@ export async function genRecordSetsForStackOutputs(options: {
       const result = await genRecordSetsForLoadBalancer({
         LoadBalancerArn: Object.values(loadBalancerArns)[0] as any,
         DNSName,
+        publicOnly,
         privateOnly,
         ELBv2,
         awsConfig,
@@ -272,6 +278,7 @@ ${
 export type GenRecordSetsForStackOptions = {
   StackName: string
   DNSName: string
+  publicOnly?: boolean
   privateOnly?: boolean
   TTL?: number
   CloudFormation?: CloudFormationClient
@@ -285,8 +292,17 @@ export type GenRecordSetsForStackOptions = {
 export async function genRecordSetsForStack(
   options: GenRecordSetsForStackOptions
 ): Promise<Array<GeneratedResourceRecordSet>> {
-  const { StackName, DNSName, privateOnly, EC2, ELBv2, verbose, region, TTL } =
-    options
+  const {
+    StackName,
+    DNSName,
+    publicOnly,
+    privateOnly,
+    EC2,
+    ELBv2,
+    verbose,
+    region,
+    TTL,
+  } = options
   const awsConfig = options.awsConfig || {
     ...(region
       ? {
@@ -312,6 +328,7 @@ export async function genRecordSetsForStack(
   return await genRecordSetsForStackOutputs({
     Outputs,
     DNSName,
+    publicOnly,
     privateOnly,
     TTL,
     EC2,
