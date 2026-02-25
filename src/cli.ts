@@ -1,5 +1,4 @@
 #!/usr/bin/env node
-// @flow
 
 /* eslint-disable no-console */
 import yargs from 'yargs'
@@ -8,11 +7,12 @@ import { upsertRecordSet } from 'mindless-route53'
 import isDomainName from 'is-domain-name'
 import inquirer from 'inquirer'
 import { genRecordSetsForStack, confirmationMessage } from './index'
-yargs
-  .command(
-    'upsert',
-    'upsert a resource record set for a given stack',
-    function (yargs: any) {
+
+void yargs
+  .command({
+    command: 'upsert',
+    describe: 'upsert a resource record set for a given stack',
+    builder: (yargs) =>
       yargs
         .usage(
           '$0 upsert <stack name> <domain name> --region <AWS region> [--ttl <time to live>]'
@@ -25,8 +25,8 @@ yargs
           type: 'number',
           describe: 'the time-to-live for the record',
         })
-        .option('c', {
-          alias: 'comment',
+        .option('comment', {
+          alias: 'c',
           type: 'string',
           describe: 'a comment for the change',
         })
@@ -34,23 +34,22 @@ yargs
           type: 'string',
           describe: 'the AWS region',
         })
-        .option('q', {
-          alias: 'quiet',
+        .option('quiet', {
+          alias: 'q',
           type: 'boolean',
           describe: 'suppress output',
         })
-        .option('v', {
-          alias: 'verbose',
+        .option('verbose', {
+          alias: 'v',
           type: 'boolean',
           describe: 'enable verbose output',
         })
-        .option('y', {
-          alias: 'yes',
+        .option('yes', {
+          alias: 'y',
           type: 'boolean',
           describe: `don't ask for confirmation`,
-        })
-    },
-    async function (argv: any) {
+        }),
+    handler: async (argv) => {
       const {
         privateOnly,
         ttl: TTL,
@@ -62,10 +61,13 @@ yargs
       } = argv
       const args = argv._.slice(1)
       const StackName = args.find(
-        (arg: any) => !isDomainName(arg) || arg.indexOf('.') < 0
+        (arg): arg is string =>
+          typeof arg === 'string' &&
+          (!isDomainName(arg) || arg.indexOf('.') < 0)
       )
       const DNSName = args.find(
-        (arg: any) => isDomainName(arg) && arg.indexOf('.') >= 0
+        (arg): arg is string =>
+          typeof arg === 'string' && isDomainName(arg) && arg.indexOf('.') >= 0
       )
       if (!StackName || !DNSName) {
         console.log(
@@ -111,9 +113,8 @@ yargs
           })
         )
       )
-    }
-  )
+    },
+  })
   .demandCommand()
   .version()
-  .help()
-yargs.argv
+  .help().argv

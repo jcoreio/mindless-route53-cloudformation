@@ -54,11 +54,11 @@ export async function genRecordSetsForECSInstance(options: {
   const { InstanceId, DNSName, publicOnly, privateOnly, TTL, verbose, region } =
     options
   const awsConfig = options.awsConfig || {
-    ...(region
-      ? {
-          region,
-        }
-      : {}),
+    ...(region ?
+      {
+        region,
+      }
+    : {}),
   }
   const log = options.log || console.error.bind(console) // eslint-disable-line no-console
   const EC2 = options.EC2 || new EC2Client(awsConfig)
@@ -138,11 +138,11 @@ export async function genRecordSetsForLoadBalancer(options: {
   const { LoadBalancerArn, DNSName, publicOnly, privateOnly, verbose, region } =
     options
   const awsConfig = options.awsConfig || {
-    ...(region
-      ? {
-          region,
-        }
-      : {}),
+    ...(region ?
+      {
+        region,
+      }
+    : {}),
   }
   const log = options.log || console.error.bind(console) // eslint-disable-line no-console
   const ELBv2 = options.ELBv2 || new ElasticLoadBalancingV2Client(awsConfig)
@@ -172,18 +172,18 @@ export async function genRecordSetsForLoadBalancer(options: {
     },
   } as const
   return [
-    ...(privateOnly
-      ? []
-      : [
-          {
-            ResourceRecordSet,
-            LoadBalancerArn,
-            PrivateZone: false,
-          },
-        ]),
-    ...(publicOnly
-      ? []
-      : [{ ResourceRecordSet, LoadBalancerArn, PrivateZone: true }]),
+    ...(privateOnly ?
+      []
+    : [
+        {
+          ResourceRecordSet,
+          LoadBalancerArn,
+          PrivateZone: false,
+        },
+      ]),
+    ...(publicOnly ?
+      []
+    : [{ ResourceRecordSet, LoadBalancerArn, PrivateZone: true }]),
   ]
 }
 export async function genRecordSetsForStackOutputs(options: {
@@ -265,14 +265,14 @@ export async function genRecordSetsForStackOutputs(options: {
   }
   throw new Error(`Multiple addressable outputs found!
 ${
-  isEmpty(ecsInstanceIds)
-    ? ''
-    : `ECS Instances:\n  ${Object.values(ecsInstanceIds).join('\n  ')}`
+  isEmpty(ecsInstanceIds) ? '' : (
+    `ECS Instances:\n  ${Object.values(ecsInstanceIds).join('\n  ')}`
+  )
 }
 ${
-  isEmpty(loadBalancerArns)
-    ? ''
-    : `Load Balancers:\n  ${Object.values(loadBalancerArns).join('\n  ')}`
+  isEmpty(loadBalancerArns) ? '' : (
+    `Load Balancers:\n  ${Object.values(loadBalancerArns).join('\n  ')}`
+  )
 }`)
 }
 export type GenRecordSetsForStackOptions = {
@@ -304,11 +304,11 @@ export async function genRecordSetsForStack(
     TTL,
   } = options
   const awsConfig = options.awsConfig || {
-    ...(region
-      ? {
-          region,
-        }
-      : {}),
+    ...(region ?
+      {
+        region,
+      }
+    : {}),
   }
   const log = options.log || console.error.bind(console) // eslint-disable-line no-console
   const CloudFormation =
@@ -352,11 +352,11 @@ export async function upsertRecordSetsForStack(
   const log = options.log || console.error.bind(console) // eslint-disable-line no-console
   const { verbose, Comment, region, Route53, waitForChanges } = options
   const awsConfig = options.awsConfig || {
-    ...(region
-      ? {
-          region,
-        }
-      : {}),
+    ...(region ?
+      {
+        region,
+      }
+    : {}),
   }
   await Promise.all(
     recordSets.map(
@@ -384,7 +384,6 @@ export function confirmationMessage(options: {
   recordSets: Array<GeneratedResourceRecordSet>
 }): string {
   const { StackName, recordSets } = options
-  /* eslint-disable no-console */
   return `These are the DNS records that will be upserted for stack ${StackName}:
 
 ${recordSets
@@ -396,15 +395,14 @@ ${recordSets
       InstanceId,
       LoadBalancerArn,
     }: GeneratedResourceRecordSet) => `${chalk.bold(
-      ResourceRecordSet?.Name || ''
+      ResourceRecordSet.Name || ''
     )} (${PrivateZone ? 'private' : 'public'} zone)
   from stack output [${String(OutputKey)}]: ${String(
-      InstanceId || LoadBalancerArn
-    )}:
+    InstanceId || LoadBalancerArn
+  )}:
 ${JSON.stringify(ResourceRecordSet, null, 2).replace(/^/gm, '  ')}
 `
   )
   .join('\n')}
   `
-  /* eslint-enable no-console */
 }

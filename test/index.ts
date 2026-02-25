@@ -171,8 +171,8 @@ const Route53 = {
           z.Id === HostedZoneId ||
           (DNSName && z.Name.endsWith(DNSName.replace(/\.?$/, '.')))
       )
-      return i < 0
-        ? {
+      return i < 0 ?
+          {
             HostedZones: [],
             IsTruncated: false,
           }
