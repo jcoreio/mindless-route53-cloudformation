@@ -39,8 +39,8 @@ importers:
         specifier: ^3.1.0
         version: 3.1.0
       mindless-route53:
-        specifier: ^2.0.4
-        version: 2.0.4
+        specifier: ^2.0.5
+        version: 2.0.5
       typed-validators:
         specifier: ^4.4.0
         version: 4.5.1
@@ -2383,8 +2383,8 @@ packages:
     resolution: {integrity: sha512-VP79XUPxV2CigYP3jWwAUFSku2aKqBH7uTAapFWCBqutsbmDo96KY5o8uh6U+/YSIn5OxJnXp73beVkpqMIGhA==}
     engines: {node: '>=18'}
 
-  mindless-route53@2.0.4:
-    resolution: {integrity: sha512-NxlH6Qv6rDoFFAQMlYZs0M5WzjZ36Q/ko6NHB6UVGTbFTu11f2Mw2kRzNwaPjH0W8WC7puwusIU0HPdwhlthvA==}
+  mindless-route53@2.0.5:
+    resolution: {integrity: sha512-mH+jKq42iL+arAURph+Nwa1SBLzJ2i0OL+daT6zASNoaiZDxw8IOTcHqMXSNKnddl5zsTVRlOBqI5uwsGvF4nQ==}
     engines: {node: '>=16'}
     hasBin: true
 
@@ -6297,7 +6297,7 @@ snapshots:
 
   mimic-function@5.0.1: {}
 
-  mindless-route53@2.0.4:
+  mindless-route53@2.0.5:
     dependencies:
       '@aws-sdk/client-route-53': 3.998.0
       '@babel/runtime': 7.28.6
