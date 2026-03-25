@@ -30,12 +30,12 @@
   "homepage": "https://github.com/jcoreio/mindless-route53-cloudformation#readme",
   "devDependencies": {
     "@babel/node": "^7.5.5",
-    "@jcoreio/toolchain": "^5.10.3",
-    "@jcoreio/toolchain-circle": "^5.10.3",
-    "@jcoreio/toolchain-esnext": "^5.10.3",
-    "@jcoreio/toolchain-mocha": "^5.10.3",
-    "@jcoreio/toolchain-semantic-release": "^5.10.3",
-    "@jcoreio/toolchain-typescript": "^5.10.3",
+    "@jcoreio/toolchain": "^5.10.4",
+    "@jcoreio/toolchain-circle": "^5.10.4",
+    "@jcoreio/toolchain-esnext": "^5.10.4",
+    "@jcoreio/toolchain-mocha": "^5.10.4",
+    "@jcoreio/toolchain-semantic-release": "^5.10.4",
+    "@jcoreio/toolchain-typescript": "^5.10.4",
     "@types/chai": "^4.3.5",
     "@types/chai-as-promised": "^7.1.8",
     "@types/inquirer": "^6.5.0",
@@ -53,17 +53,17 @@
     "typescript": "^5.1.0"
   },
   "dependencies": {
-    "@aws-sdk/client-cloudformation": "^3.998.0",
-    "@aws-sdk/client-ec2": "^3.998.0",
-    "@aws-sdk/client-elastic-load-balancing-v2": "^3.998.0",
-    "@aws-sdk/client-route-53": "^3.998.0",
+    "@aws-sdk/client-cloudformation": "^3.988.0",
+    "@aws-sdk/client-ec2": "^3.988.0",
+    "@aws-sdk/client-elastic-load-balancing-v2": "^3.988.0",
+    "@aws-sdk/client-route-53": "^3.988.0",
     "@babel/runtime": "^7.26.0",
     "@types/node": "^17.0.14",
     "chalk": "^2.4.2",
     "inquirer": "^6.5.0",
     "is-domain-name": "^1.0.1",
     "is-ip": "^3.1.0",
-    "mindless-route53": "^2.0.2",
+    "mindless-route53": "^2.0.4",
     "typed-validators": "^4.4.0",
     "yargs": "^17.7.2"
   },
@@ -86,6 +86,6 @@
   },
   "packageManager": "pnpm@10.6.5",
   "@jcoreio/toolchain": {
-    "migratedVersion": "5.10.3"
+    "migratedVersion": "5.10.4"
   }
 }
